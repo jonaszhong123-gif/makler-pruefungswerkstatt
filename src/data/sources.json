@@ -1,0 +1,90 @@
+{
+  "asOf": "2026-08-13",
+  "authorityRule": "Aktuelle WKO-Befähigungsprüfungsordnung und RIS sind die Faktenautorität. Sekundärmaterial darf nur Lernabdeckung und Didaktik anregen.",
+  "items": [
+    {
+      "id": "wko-bpo-2024",
+      "title": "Versicherungsmakler-Befähigungsprüfungsordnung",
+      "authority": "Wirtschaftskammer Österreich",
+      "status": "current",
+      "factStatus": "confirmed",
+      "url": "https://www.wko.at/information-consulting/versicherungsmakler-berater-versicherungsangelegenheiten/befaehigungspruefungsordnung-versicherungsmakler.pdf",
+      "fundstelle": "WKO BPO, §§ 1–14 und Anlage",
+      "effectiveFrom": "2024-07-01",
+      "supersededOn": null,
+      "checkedOn": "2026-08-13",
+      "scope": "Prüfungsstruktur, Gegenstände, Zeiten, Kriterien und Lernergebnisse von Modul 1 und 2.",
+      "note": "Modul 3 ist im v0 ausdrücklich ausgeschlossen."
+    },
+    {
+      "id": "ris-vv-2026",
+      "title": "Versicherungsvermittlungs-Verordnung 2026",
+      "authority": "RIS / Bundesgesetzblatt",
+      "status": "current",
+      "factStatus": "confirmed",
+      "url": "https://www.ris.bka.gv.at/eli/bgbl/II/2026/217/20260722",
+      "fundstelle": "BGBl. II Nr. 217/2026",
+      "effectiveFrom": "2026-07-23",
+      "supersededOn": null,
+      "checkedOn": "2026-08-13",
+      "scope": "Aktuelle Zugangsvoraussetzungen für die Versicherungsvermittlung.",
+      "note": "Aktuelle Rechtsquelle; ersetzt die Verordnung 2010."
+    },
+    {
+      "id": "ris-apo-2004",
+      "title": "Allgemeine Prüfungsordnung",
+      "authority": "RIS / Bundesrecht konsolidiert",
+      "status": "current",
+      "factStatus": "confirmed",
+      "url": "https://www.ris.bka.gv.at/NormDokument.wxe?Abfrage=Bundesnormen&Anlage=&Artikel=&Gesetzesnummer=20003243&Paragraf=0&Uebergangsrecht=",
+      "fundstelle": "BGBl. II Nr. 110/2004, zuletzt geändert durch BGBl. II Nr. 418/2023",
+      "effectiveFrom": "2004-03-05",
+      "supersededOn": null,
+      "checkedOn": "2026-08-13",
+      "scope": "Allgemeine Durchführung von Meister- und Befähigungsprüfungen; anwendbar über BPO § 1.",
+      "note": "Aktuelle konsolidierte RIS-Fassung ohne ausgewiesenes Außerkrafttretensdatum."
+    },
+    {
+      "id": "ris-vv-2010",
+      "title": "Versicherungsvermittler - Verordnung 2010",
+      "authority": "RIS / historische Fassung",
+      "status": "superseded",
+      "factStatus": "confirmed",
+      "url": "https://www.ris.bka.gv.at/eli/bgbl/ii/2010/156/P0/NOR40118330",
+      "fundstelle": "BGBl. II Nr. 156/2010",
+      "effectiveFrom": "2010-06-02",
+      "supersededOn": "2026-07-22",
+      "checkedOn": "2026-08-13",
+      "scope": "Historischer Nachweis der früheren Zugangsvoraussetzungen.",
+      "note": "Nicht als aktuelle Grundlage verwenden; abgelöst durch BGBl. II Nr. 217/2026."
+    },
+    {
+      "id": "boev-2025",
+      "title": "BÖV-Lernmaterial 2025",
+      "authority": "Sekundärmaterial",
+      "status": "pending",
+      "factStatus": "unknown",
+      "url": null,
+      "fundstelle": null,
+      "effectiveFrom": null,
+      "supersededOn": null,
+      "checkedOn": "2026-08-13",
+      "scope": "Nur mögliche Basisthemen-Abdeckung und didaktische Struktur.",
+      "note": "Dokument/URL: missing. Im v0 wurde kein Originaltext, keine Tabelle, keine Originalfrage und keine Antwort übernommen."
+    },
+    {
+      "id": "state-dates-fees",
+      "title": "Landesprüfungstermine und -gebühren",
+      "authority": "Jeweilige Meisterprüfungsstelle",
+      "status": "pending",
+      "factStatus": "unknown",
+      "url": null,
+      "fundstelle": null,
+      "effectiveFrom": null,
+      "supersededOn": null,
+      "checkedOn": "2026-08-13",
+      "scope": "Künftige bundeslandspezifische Termine und Gebühren.",
+      "note": "Wert: missing. Keine Übertragung aus einem einzelnen Bundesland."
+    }
+  ]
+}
