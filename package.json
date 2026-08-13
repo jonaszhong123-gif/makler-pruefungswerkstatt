@@ -1,0 +1,22 @@
+{
+  "name": "makler-pruefungswerkstatt",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "engines": {
+    "node": ">=20.19.0"
+  },
+  "scripts": {
+    "dev": "node scripts/serve.mjs . 5173",
+    "dev:lan": "node scripts/serve.mjs . 5174 0.0.0.0",
+    "preview": "node scripts/serve.mjs dist 4173",
+    "preview:lan": "node scripts/serve.mjs dist 4174 0.0.0.0",
+    "build": "node scripts/build.mjs",
+    "lint": "node scripts/lint.mjs",
+    "typecheck": "node --no-warnings --experimental-vm-modules scripts/typecheck.mjs",
+    "test": "node --test --test-isolation=none tests/progress.test.mjs tests/serve-cli.test.mjs tests/sources.test.mjs tests/ui-contract.test.mjs",
+    "test:run": "node --test --test-isolation=none tests/progress.test.mjs tests/serve-cli.test.mjs tests/sources.test.mjs tests/ui-contract.test.mjs"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}
