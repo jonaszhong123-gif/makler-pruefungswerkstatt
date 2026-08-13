@@ -1,10 +1,10 @@
-# Makler Prüfungswerkstatt — v0
+# Makler Prüfungswerkstatt — v1 Modul 1/2
 
-Eine lokale, quellensichtbare Lernwerkstatt für die österreichische Befähigungsprüfung der Versicherungsmakler. Der v0 umfasst ausschließlich Modul 1 und Modul 2. Modul 3 / Unternehmerprüfung ist ausdrücklich ausgeschlossen.
+Eine lokale, quellensichtbare Lernwerkstatt mit dem Ziel, auf Modul 1 und Modul 2 der österreichischen Versicherungsmakler-Befähigungsprüfung vorzubereiten. Modul 3 / Unternehmerprüfung ist ausdrücklich ausgeschlossen.
 
-## Direkt starten
+## Start
 
-Voraussetzung: Node.js 20.19 oder neuer. Das v0 hat keine externen Laufzeit- oder Entwicklungsabhängigkeiten.
+Voraussetzung: Node.js 20.19 oder neuer. Die Anwendung hat keine externen Laufzeit- oder Entwicklungsabhängigkeiten.
 
 ```powershell
 cd D:\Codex\Projects\makler-pruefungswerkstatt
@@ -13,7 +13,7 @@ npm.cmd run dev
 
 Danach `http://127.0.0.1:5173` öffnen. Eine Installation mit `npm install` ist nicht nötig.
 
-Für den gebauten Stand:
+Gebauter Stand:
 
 ```powershell
 npm.cmd run build
@@ -22,36 +22,35 @@ npm.cmd run preview
 
 Danach `http://127.0.0.1:4173` öffnen.
 
-## Vorschau am Handy im selben WLAN
-
-Die gebaute Vorschau für das lokale Netzwerk auf dem PC starten:
-
-```powershell
-npm.cmd run preview:lan
-```
-
-Am Handy im selben WLAN anschließend `http://10.93.1.22:4174/` öffnen. Für den ungebauten Arbeitsstand steht entsprechend `npm.cmd run dev:lan` auf Port `5174` zur Verfügung.
-
-`127.0.0.1` bezeichnet immer das Gerät selbst. Auf dem Handy zeigt diese Adresse daher auf das Handy und niemals auf den PC; für den Zugriff vom Handy kann sie nicht funktionieren. Die LAN-IP des PCs kann sich ändern, und eine lokale Firewall kann den Zugriff trotz korrekter Bindung blockieren.
-
 ## Enthalten
 
-- acht direkt erreichbare Arbeitsbereiche: Heute, Prüfungsplan, Lernpfad, Fallwerkstatt, Schriftlich, Mündlich, Fehler und Quellen;
-- getrennte Gegenstände M1-A, M1-B, M2-A und M2-B — ohne erfundene Gesamtbestehensquote;
-- eine vollständig originale Fallakte zur Kaffeerösterei mit Fakten, fehlenden Angaben, Risiken, Regel, Lösung und Ausschlussgründen, `CONTRACT_CHECK_REQUIRED`, Kundenerklärung und nächsten Schritten;
-- vier originale schriftliche Aufgaben und vier originale mündliche Nachfragen;
-- lokale Arbeitsnotizen, Antworten, Bearbeitungsstand, Fehlerprotokoll und Wiederholungsqueue im Browser;
-- Deutsch als Normebene; optional zuschaltbare chinesische Verständnisstützen;
-- strukturiertes Quellenregister mit `current`, `superseded` und `pending` sowie `confirmed`, `derived` und `unknown`;
-- sichtbare Lade-, Leer-, Fehler- und Disabled-Zustände.
+- vollständige Coverage Matrix mit 23 Qualifikationsergebnissen und 38 Zuordnungen zu § 6, § 7, § 9 und § 10;
+- vier getrennte Gegenstände M1-A, M1-B, M2-A und M2-B mit den geltenden Prüfungsregeln;
+- 23 originale, vollständige Lektionen mit `Ich kann`, Entscheidungsrahmen, Ablauf, Fehlern, Mikrofall, Selbstcheck, Quellen, Aussagegrenzen und Abschlussgate;
+- 12 schriftliche und 13 mündliche originale Übungen sowie 9 originale, spartenübergreifende Fälle mit jeweils drei verpflichtenden Outputs;
+- echte Lernschleife von Heute über Lektion und Selbstcheck zu Prüfungstraining, Fehlerprotokoll, Deep-Link-Wiederholung und bestandenem Abschluss;
+- laufende Kundenbetreuung in M1-B/M2-B: Polizzenverwaltung, Schadenaufnahme/-meldung/-bearbeitung/-abwicklung, Maklerklauseln, sensible Daten, Beschwerde gegenüber dem Versicherer sowie Kündigungen durch Kunde und Versicherer einschließlich Bewertung einer bereits erklärten Kundenkündigung;
+- Rechtsnavigator für GewO, MaklerG, VersVG, VAG 2016, Standesrecht, ABGB, UGB, KSchG, DSG/DSGVO, UWG, ECG und TKG 2021 sowie Sparten-Navigation Sach/Personen/Vermögen;
+- lokaler Fortschritt in `localStorage` mit validiertem JSON-Export/-Import, ohne Konto, Server oder automatischen Upload.
 
-Die gespeicherten Lernstände bleiben ausschließlich im lokalen `localStorage` des verwendeten Browsers. Es werden keine Daten übertragen.
+Die Übungen sind eigenständig erstellt. Sie sind keine offiziellen Prüfungsfragen, keine reproduzierten BÖV-Inhalte und keine Erfolgsprognose.
 
 ## Fakten- und Inhaltsgrenzen
 
-Faktenautorität für den Stand 2026-08-13 sind die aktuelle WKO-Befähigungsprüfungsordnung und RIS. Das BÖV-Lernmaterial 2025 ist nur als noch nicht belegtes Sekundärmaterial registriert; kein Originaltext, keine Tabelle, keine Originalfrage und keine Antwort wurde übernommen. Landesprüfungstermine und Gebühren bleiben `missing`.
+Faktenautorität für den am 13.08.2026 verifizierten Stand sind ausschließlich die WKO-Befähigungsprüfungsordnung und RIS. Konsolidierte Rechtslinks müssen vor einer konkreten Anwendung auf Tagesstand und einschlägige Fassung geprüft werden (`CURRENT_AUTHORITY_REQUIRED`). Produkt-, Deckungs- und Vertragsfragen bleiben ohne konkreten Originalvertrag `CONTRACT_CHECK_REQUIRED`; unbelegte Angaben bleiben `unknown` oder `missing`.
 
-Der interne KB-Preflight ergab `KB_SNAPSHOT_MATCH`, `ROUTE_NO_MATCH`, `BLOCKED_PENDING_EVIDENCE`. Deshalb wurde keine interne Karte geöffnet oder verwendet. Produkt-, Deckungs- und Vertragsfragen bleiben dort, wo Belege fehlen, `CONTRACT_CHECK_REQUIRED` beziehungsweise `unknown`.
+Der interne KB-Preflight ergab:
+
+```text
+KB_SNAPSHOT_MATCH
+ROUTE_NO_MATCH
+primary_card: null
+supporting_cards: []
+content_status: BLOCKED_PENDING_EVIDENCE
+source_text_returned: false
+```
+
+Daher wurde kein interner Originaltext verwendet. Es wurden keine privaten BÖV-Lehrmittel, Tabellen, Originalfragen oder Antworten hochgeladen, kopiert oder veröffentlicht.
 
 Die Anwendung ist keine offizielle Prüfungsplattform und keine Rechts-, Vertrags- oder Produktempfehlung.
 
@@ -62,28 +61,22 @@ npm.cmd run lint
 npm.cmd run typecheck
 npm.cmd run test:run
 npm.cmd run build
+npm.cmd run qa:browser
 ```
 
-Die Prüflogik verwendet nur Node-Bordmittel. Hintergrund: Die bevorzugte Vite/React/TypeScript-Installation war in dieser isolierten Umgebung nicht vollständig aus dem lokalen npm-Cache auflösbar. Der v0 wurde deshalb bewusst als dependency-free ES-Module-Anwendung umgesetzt, statt eine unvollständige oder nicht reproduzierbare Installation vorzutäuschen.
+`qa:browser` prüft den gebauten `dist`-Stand mit einem temporären, isolierten Headless-Chrome-/Edge-Profil bei 320, 390, 820 und 1440 px. Der Lauf benötigt keine Browserbibliothek und entfernt seinen eigenen Server, Browserprozess und Profilordner wieder.
 
 ## Projektstruktur
 
-- `src/app.js` — Zustandsmodell, Rendering und Interaktionen
-- `src/styles.css` — responsives Editorial-Design und Accessibility-Zustände
-- `src/data/` — strukturierte Quellen, Prüfungsgegenstände und Originalfall
-- `src/utils/progress.js` — lokales Fortschrittsmodell
-- `tests/` — deterministische Daten- und Fortschrittstests
+- `src/app.js` — Browserzustand, Persistenz und Interaktionen
+- `src/views/templates.js` — datengesteuerte Ansichten
+- `src/data/curriculum.js` — 23 Ergebnisse, 38 Slots, Regeln, Rechts- und Sparten-Navigation
+- `src/data/practice.js` — originale schriftliche, mündliche und Fallübungen
+- `src/data/sources.json` — auditiertes Quellenregister
+- `src/utils/` — Fortschritt, Router und Workflow-Gates
+- `tests/` — Daten-, Mapping-, Workflow-, Migrations- und UI-Vertragstests
 - `scripts/` — lokaler Server, Build, Lint und Modulsyntaxprüfung
-- `docs/design-decisions.md` — visuelle und funktionale Entscheidungen
-- `docs/content-governance.md` — Quellen-, Status- und Scope-Grenzen
-- `artifacts/v0/` — v0-Verifikationsartefakte
 
-## Freigabestand
+## Veröffentlichungsgrenze
 
-`VERÖFFENTLICHT_AM_2026-08-13`
-
-Der am 13. August 2026 freigegebene Stand ist über GitHub Pages öffentlich erreichbar:
-
-<https://jonaszhong123-gif.github.io/makler-pruefungswerkstatt/>
-
-Technische Prüfungen, visuelle Bestätigung und öffentliche Bereitstellung bleiben getrennte Gates.
+Dieser v1-Arbeitsstand ist nur lokal implementiert und geprüft. Er wurde in diesem Auftrag weder committed noch gepusht noch veröffentlicht. Eine möglicherweise noch erreichbare GitHub-Pages-Seite repräsentiert bis zu einer getrennten Veröffentlichung weiterhin einen älteren Stand.

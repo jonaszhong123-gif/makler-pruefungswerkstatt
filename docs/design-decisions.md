@@ -26,11 +26,12 @@ Die Today-Ansicht hat zwei unterschiedliche Aufgaben. Der heutige Arbeitsauftrag
 
 ## Navigation und responsive Hierarchie
 
-- Desktop behält die sticky linke Navigation. Die Fallwerkstatt bleibt bei breiter Desktopfläche dreispaltig: Aktenregister, Arbeitsblatt und Entscheidungstor.
+- Desktop behält die sticky linke Navigation. Lernpfad und Fallwerkstatt nutzen bei breiter Desktopfläche jeweils ein kompaktes Register neben dem vollständigen Arbeitsblatt.
 - Bis einschließlich 820 px ersetzt eine 72 px hohe sticky Topbar die alte gestapelte Navigation.
 - Der rechte Drawer enthält alle acht Routen. Er besitzt `aria-expanded`, `aria-controls`, `aria-current`, Fokusübergabe, Tab-Begrenzung, Escape-/Backdrop-Schließen, Fokusrückgabe und Body-Scroll-Lock. Während er geöffnet ist, sind Skip-Link, Topbar und App-Fläche per `inert` aus Fokus- und Accessibility-Baum genommen; beim Schließen wird dieser Zustand vor der Fokusrückgabe aufgehoben.
 - Direkte Routen wie `#/sources` markieren beim Öffnen des Drawers den aktiven Eintrag und machen ihn innerhalb des Drawer-Scrollcontainers sichtbar. `scrollIntoView` wird nicht verwendet.
-- `#/learning-path/<lesson-id>` adressiert den nächsten noch nicht abgeschlossenen Lernschritt. Die Today-Aktion setzt diesen Deep-Link, scrollt mit `window.scrollTo` und fokussiert den konkreten Lernschritt, ohne ihn automatisch als erledigt zu markieren.
+- `#/learning-path/<outcome-id>`, `#/written/<question-id>`, `#/oral/<question-id>` und `#/case-workshop/<case-id>` adressieren die jeweilige Originalquelle. Today und Wiederholungsqueue setzen diese Deep-Links, ohne einen Schritt automatisch abzuschließen.
+- Der Skip-Link verwendet zwar semantisch `#main-content`, verhindert aber die Hash-Navigation aktiv; der Router behandelt diesen Anker zusätzlich als `ignore`, damit der aktuelle Arbeitskontext nicht verloren geht.
 - Komponenten dürfen intern horizontal scrollen, etwa Aktenregister oder Aufgabenreiter. Die Dokumentseite selbst darf bei 320, 390, 820 und 1440 px keine horizontale Überbreite erzeugen.
 
 ## Bildfunktion
@@ -41,7 +42,7 @@ Die Today-Ansicht hat zwei unterschiedliche Aufgaben. Der heutige Arbeitsauftrag
 
 - Skip-Link, semantische Landmarks und eine 3 px starke `:focus-visible`-Kontur bleiben erhalten.
 - Buttons, Filter-Chips, Status-Chips, Sprachhilfe und Selbsteinschätzung haben mindestens 44 × 44 CSS-Pixel.
-- Der `derived`-Tooltip erklärt einen tatsächlich vorkommenden Quellenstatus. Er ist über Hover, Fokus, Klick und Touch erreichbar und lässt sich mit Escape schließen.
+- `confirmed`, `derived` und `unknown` werden als sichtbare Status-Chips an Inhalt und Quellen geführt.
 - Ein `aria-live="polite"`-Toast wird ausschließlich nach erfolgreichem `localStorage.setItem` ausgelöst. Speicherfehler bleiben stattdessen als Alert sichtbar.
 - Notiz- und Antwortfelder zeigen denselben realen Speicherstatus: `lokal gespeichert` nur nach bestätigbarem Speicherzustand, andernfalls `Speicherung nicht bestätigt`. Ein später Fehler löscht noch wartende Erfolgs-Toast-Ankündigungen.
 - Lange Seiten enthalten eine tastaturbedienbare Nach-oben-Aktion mit `window.scrollTo`; Reduced Motion schaltet dabei auf sofortiges Scrollen.
@@ -50,9 +51,9 @@ Die Today-Ansicht hat zwei unterschiedliche Aufgaben. Der heutige Arbeitsauftrag
 ## Inhaltliche und technische Grenzen
 
 - Die vier Gegenstände M1-A, M1-B, M2-A und M2-B bleiben getrennt. Es entsteht keine Gesamtnote, Quote, Prognose oder erfundene Statistik.
-- `confirmed`, `derived`, `unknown`, `INSUFFICIENT_EVIDENCE` und `CONTRACT_CHECK_REQUIRED` bleiben sichtbar und werden nicht in Gewissheit umgedeutet.
+- `confirmed`, `derived`, `unknown`, `missing`, `CURRENT_AUTHORITY_REQUIRED` und `CONTRACT_CHECK_REQUIRED` bleiben sichtbar und werden nicht in Gewissheit umgedeutet.
 - Modul 3 / Unternehmerprüfung bleibt ausgeschlossen.
-- Daten in `src/data` werden durch die visuelle Überarbeitung nicht verändert.
+- Prüfungs- und Übungsdaten liegen getrennt in `curriculum.js`, `practice.js` und `sources.json`; alte v0-Dateien bleiben unangetastet, werden aber nicht mehr als Lernsystem-Daten importiert.
 - Es gibt keine neue Abhängigkeit, keinen Hotlink, keine CSS-Illustration, keinen Commit, Push, Upload oder Deployment.
 - Der dependency-free ES-Module-Aufbau bleibt bestehen. Das Build-Skript kopiert die lokale Bilddatei zusammen mit den Laufzeitdateien nach `dist` und prüft das Ziel mit `node:path.relative`, `sep` und `isAbsolute` plattformunabhängig als Unterverzeichnis des Projektroots.
-- HTML-Laufzeitressourcen verwenden project-pages-safe relative URLs (`./src/...`). Das Quellenregister wird modulrelativ mit `new URL('./data/sources.json', import.meta.url)` geladen, damit sowohl GitHub-Pages-Projektpfade als auch der gebaute `dist`-Baum korrekt funktionieren.
+- HTML-Laufzeitressourcen verwenden project-pages-safe relative URLs (`./src/...`). Das Quellenregister wird relativ zum Dokument über `./src/data/sources.json` geladen, damit Arbeitsbaum und gebauter `dist`-Baum dieselbe Struktur verwenden.

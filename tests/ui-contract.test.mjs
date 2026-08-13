@@ -1,157 +1,155 @@
-import test from 'node:test'
 import assert from 'node:assert/strict'
-import { readFile, stat } from 'node:fs/promises'
+import { readFile } from 'node:fs/promises'
+import test from 'node:test'
 
-const [app, styles, index, catalog, caseFile, buildScript] = await Promise.all([
+const [app, templates, router, progress, styles, index, buildScript] = await Promise.all([
   readFile(new URL('../src/app.js', import.meta.url), 'utf8'),
+  readFile(new URL('../src/views/templates.js', import.meta.url), 'utf8'),
+  readFile(new URL('../src/utils/router.js', import.meta.url), 'utf8'),
+  readFile(new URL('../src/utils/progress.js', import.meta.url), 'utf8'),
   readFile(new URL('../src/styles.css', import.meta.url), 'utf8'),
   readFile(new URL('../index.html', import.meta.url), 'utf8'),
-  readFile(new URL('../src/data/catalog.js', import.meta.url), 'utf8'),
-  readFile(new URL('../src/data/caseFile.js', import.meta.url), 'utf8'),
   readFile(new URL('../scripts/build.mjs', import.meta.url), 'utf8'),
 ])
 
-function assertOrdered(source, parts) {
-  let cursor = -1
-  for (const part of parts) {
-    const next = source.indexOf(part, cursor + 1)
-    assert.ok(next > cursor, `expected ${part} after position ${cursor}`)
-    cursor = next
-  }
-}
-
-test('the eight requested work areas are present exactly once in navigation', () => {
+test('the eight work areas and explicit Modul 3 exclusion remain visible', () => {
   for (const label of ['Heute', 'Prüfungsplan', 'Lernpfad', 'Fallwerkstatt', 'Schriftlich', 'Mündlich', 'Fehler', 'Quellen']) {
-    assert.equal((app.match(new RegExp(`label: '${label}'`, 'g')) ?? []).length, 1)
+    assert.equal((templates.match(new RegExp(`label: '${label}'`, 'g')) ?? []).length, 1)
   }
-  assert.match(app, /data-module="\$\{escapeHtml\(module\.code\)\}"/)
-  assert.match(app, /question\.module === moduleCode/)
+  assert.match(app, /M3 · EXCLUDED/)
+  assert.match(templates, /vollständig außerhalb von Navigation, Kursen, Übungen und Fortschritt/)
 })
 
-test('only the four Module 1 and 2 subjects are catalogued', () => {
-  const codes = [...catalog.matchAll(/code: '(M\d-[AB])'/g)].map((match) => match[1])
-  assert.deepEqual([...new Set(codes)].sort(), ['M1-A', 'M1-B', 'M2-A', 'M2-B'])
-  assert.doesNotMatch(catalog, /M3-[A-Z]/)
+test('skip navigation never becomes an application route', () => {
+  assert.match(app, /class=\"skip-link\" href=\"#main-content\" data-action=\"skip-content\"/)
+  assert.match(app, /action === 'skip-content'/)
+  assert.match(app, /event\.preventDefault\(\)/)
+  assert.match(router, /hash === '#main-content'/)
+  assert.match(router, /return \{ ignore: true \}/)
 })
 
-test('the original case exposes all eight decision layers', () => {
-  for (const id of ['facts', 'missing', 'risks', 'rule', 'solution', 'contract', 'explanation', 'next']) {
-    assert.match(caseFile, new RegExp(`id: '${id}'`))
-  }
-  assert.match(caseFile, /CONTRACT_CHECK_REQUIRED/)
-  assert.match(app, /INSUFFICIENT_EVIDENCE/)
+test('Today resolves to a due source or a real lesson deep link', () => {
+  assert.match(templates, /sortReviewQueue\(state\.progress\.reviewQueue\)/)
+  assert.match(templates, /routeForReviewItem\(nextReview\)/)
+  assert.match(templates, /view: 'learning-path', targetId: nextLesson\.id/)
+  assert.doesNotMatch(templates, /nextView = .*mistakes/)
+  assert.match(templates, /nextReview\s*\? 'Wiederholung öffnen'/)
+  assert.match(templates, /nextLesson\s*\? 'Lektion öffnen'/)
+  assert.match(templates, /: 'Lernpfad wiederholen'/)
+  assert.match(templates, /23 LEKTIONEN ABGESCHLOSSEN/)
+  assert.match(templates, /emptyState\('Lernpfad vollständig'/)
+  assert.equal((templates.match(/NÄCHSTE LEKTION/g) ?? []).length, 1)
 })
 
-test('accessibility and explicit non-happy states remain part of the UI contract', () => {
+test('lesson completion is gated by a checked correct answer', () => {
+  assert.match(templates, /data-action=\"lesson-check\"/)
+  assert.match(templates, /!complete && !check\?\.correct \? 'disabled'/)
+  assert.match(app, /selectedIndex === outcome\.course\.selfCheck\.correctIndex/)
+  assert.match(app, /if \(!completed && !check\?\.correct\)/)
+  assert.doesNotMatch(app, /toggle-lesson/)
+})
+
+test('written practice hides guidance until a valid fixed submission and supports retry', () => {
+  assert.match(templates, /attempt\.revealed\s*\? `<section class=\"reference-panel\"/)
+  assert.match(templates, /attempt\.revealed \? 'readonly'/)
+  assert.match(app, /isValidWrittenAnswer\(answer, question\.minChars, question\.minUnits\)/)
+  assert.match(templates, /data-action=\"practice-redo\" data-kind=\"written\"/)
+  assert.match(templates, /fachlicheRichtigkeit/)
+  assert.match(templates, /praxistauglichkeit/)
+})
+
+test('oral practice gates observations, supplies a timer and uses three dimensions', () => {
+  assert.match(templates, /Nachfragen und Beobachtungspunkte sind noch verborgen/)
+  assert.match(templates, /data-action=\"timer-toggle\"/)
+  assert.match(app, /isValidOralAttempt/)
+  assert.match(templates, /schluessigeArgumentation/)
+  assert.match(templates, /data-action=\"practice-redo\" data-kind=\"oral\"/)
+  assert.match(templates, /data-action=\"oral-submit\"[\s\S]*?canSubmit \? '' : 'disabled'/)
+  assert.match(app, /function syncOralSubmitGate\(id\)/)
+})
+
+test('review queue deep-links to its source and has no manual done/delete affordance', () => {
+  assert.match(templates, /routeForReviewItem\(item\)/)
+  assert.match(templates, /Quelle öffnen/)
+  assert.match(app, /removeReviewItemsForSource/)
+  assert.doesNotMatch(`${app}\n${templates}`, /data-action=\"remove-queue\"/)
+  assert.doesNotMatch(`${app}\n${templates}`, />erledigt<\/button>/)
+})
+
+test('every case step has a real output gate and reversible consistent completion', () => {
+  assert.match(templates, /data-input=\"case-output\"/)
+  assert.match(templates, /complete \? 'readonly'/)
+  assert.match(app, /isValidCaseOutput\(output, step\.minChars\)/)
+  assert.match(app, /Abschluss zurückgenommen; der Fallschritt ist wieder fällig/)
+  assert.match(app, /progress\.reviewQueue\.filter\(\(item\) => item\.id !== reviewId\)/)
+  assert.match(templates, /!complete && !isValidCaseOutput\(value, step\.minChars\) \? 'disabled'/)
+  assert.match(app, /function syncCaseStepGate\(caseId, stepId, output\)/)
+  assert.match(app, /button\.disabled = !complete && !isValidCaseOutput/)
+})
+
+test('local persistence is explicit and has validated export and import controls', () => {
+  assert.match(templates, /Fortschritt bleibt in localStorage/)
+  assert.match(templates, /Kein Konto, kein Server, kein automatischer Upload/)
+  assert.match(app, /exportProgress\(state\.progress\)/)
+  assert.match(app, /parseProgress\(await file\.text\(\)\)/)
+  assert.match(app, /window\.confirm/)
+})
+
+test('accessibility, responsive layout and visual-system constraints remain explicit', () => {
   assert.match(index, /<html lang="de">/)
-  assert.match(app, /class="skip-link"/)
-  assert.match(app, /role="alert"/)
-  assert.match(app, /aria-live="polite"/)
-  assert.match(app, /Produktempfehlung erstellen<\/button>/)
-  assert.match(app, /Noch kein Fehler protokolliert/)
-  assert.match(app, /Register nicht verfügbar/)
-  assert.match(app, /keydown/)
-  assert.match(app, /focusMain\(\)/)
+  assert.match(templates, /lang=\"zh-Hans\"/)
+  assert.match(app, /role=\"alert\"/)
+  assert.match(app, /aria-live=\"polite\"/)
   assert.match(app, /ArrowDown/)
-})
-
-test('responsive and reduced-motion rules are explicit', () => {
+  assert.match(app, /navigationHost\.scrollTop \+=/)
+  assert.match(styles, /:focus-visible/)
+  assert.match(styles, /\.queue-list li > button \{[\s\S]*?min-height: 44px/)
   for (const width of ['1120px', '820px', '540px']) assert.match(styles, new RegExp(`max-width: ${width}`))
   assert.match(styles, /prefers-reduced-motion: reduce/)
-  assert.match(styles, /:focus-visible/)
-  assert.match(styles, /border-radius:\s*(?:8|12)px/)
-  assert.match(styles, /height:\s*72px/)
-  assert.match(styles, /min-height:\s*44px/)
-  assert.match(styles, /backdrop-filter:\s*blur/)
   assert.doesNotMatch(styles, /(?:linear|radial|conic)-gradient/i)
+  assert.doesNotMatch(styles, /overflow-x:\s*clip/)
+  assert.match(styles, /\.mobile-drawer \{[\s\S]*?clip-path: inset\(0 0 0 100%\);/)
+  assert.match(styles, /\.mobile-drawer\.is-open \{[\s\S]*?clip-path: inset\(0\);/)
+  assert.match(styles, /\.practice-tabs \{[\s\S]*?overflow-x: auto;[\s\S]*?overflow-y: hidden;/)
+  assert.match(styles, /\.timer-panel > div \{[\s\S]*?grid-template-columns: repeat\(2, minmax\(0, 1fr\)\)/)
+  assert.match(styles, /\.queue-list strong,[\s\S]*?overflow-wrap: anywhere/)
 })
 
-test('root document can shrink to the scrollbar-reduced layout viewport', () => {
-  for (const selector of ['html', 'body']) {
-    const rule = styles.match(new RegExp(`(?:^|\\n)${selector}\\s*\\{([^{}]*)\\}`))
-    assert.ok(rule, `expected a root ${selector} rule`)
-    assert.match(rule[1], /min-width:\s*0;/)
-    assert.doesNotMatch(rule[1], /min-width:\s*320px;/)
-  }
+test('startup migration and JSON import preserve the same complete sanitized legacy archive', () => {
+  assert.match(app, /attachLegacyV1\(progress, legacy\)/)
+  assert.match(app, /migrated = parseProgress\(legacy\)/)
+  assert.match(app, /parseProgress\(await file\.text\(\)\)/)
+  assert.match(progress, /export const parseProgress = \(raw\) =>/)
+  assert.match(progress, /export const attachLegacyV1 = \(progress, raw\) =>/)
+  assert.doesNotMatch(`${app}\n${progress}`, /reachableLegacyIds/)
 })
 
-test('language aid and local-only progress are explicit', () => {
-  assert.match(app, /Deutsch bleibt Normebene/)
-  assert.match(app, /lang="zh-Hans"/)
-  assert.match(app, /window\.localStorage/)
-  assert.match(app, /fetch\(new URL\('\.\/data\/sources\.json', import\.meta\.url\), \{ cache: 'no-store' \}\)/)
-  assert.doesNotMatch(app, /fetch\(['"]\/src\//)
+test('failed rubric dimensions drive both the German queue label and urgency', () => {
+  assert.match(app, /failedRubricDimensionLabels\(attempt\.scores, dimensions\)/)
+  assert.match(app, /failedDimensions\.join\(', '\)/)
+  assert.match(app, /reviewDueForScores\(attempt\.scores, dimensions\)/)
 })
 
-test('runtime assets are relative for GitHub project pages', () => {
-  assert.match(index, /href="\.\/src\/styles\.css"/)
-  assert.match(index, /src="\.\/src\/app\.js"/)
-  assert.doesNotMatch(index, /(?:href|src)="\/src\//)
-  assert.doesNotMatch(app, /(?:src="|fetch\(['"])\/src\//)
+test('every render clears the mobile drawer scroll lock before replacing its DOM', () => {
+  assert.match(app, /function render\([^)]*\) \{\s*document\.body\.classList\.remove\('drawer-open'\)/)
 })
 
-test('build target containment is cross-platform', () => {
-  assert.match(buildScript, /from 'node:path'/)
+test('the production build includes every new runtime module', () => {
+  for (const path of [
+    'src/data/curriculum.js',
+    'src/data/practice.js',
+    'src/utils/router.js',
+    'src/utils/workflow.js',
+    'src/views/templates.js',
+  ]) assert.match(buildScript, new RegExp(path.replaceAll('/', '\\/')))
+  assert.match(buildScript, /version: 'v1-modul-1-2'/)
+})
+
+test('the production build cleans only a contained non-link dist and excludes obsolete case data', () => {
   assert.match(buildScript, /const distFromRoot = relative\(root, dist\)/)
   assert.match(buildScript, /distFromRoot\.startsWith\(`\.\.\$\{sep\}`\)/)
   assert.match(buildScript, /isAbsolute\(distFromRoot\)/)
-  assert.doesNotMatch(buildScript, /root\}\\\\/)
-})
-
-test('mobile navigation is an accessible eight-route drawer', () => {
-  assert.match(app, /aria-controls="mobile-navigation"/)
-  assert.match(app, /id="mobile-navigation"/)
-  assert.match(app, /role="dialog"/)
-  assert.match(app, /aria-modal="true"/)
-  assert.match(app, /aria-expanded="false"/)
-  assert.match(app, /aria-current="page"/)
-  assert.match(app, /document\.body\.classList\.add\('drawer-open'\)/)
-  assert.match(app, /event\.key === 'Escape'/)
-  assert.match(app, /event\.key === 'Tab'/)
-  assert.match(app, /drawerRestoreTarget/)
-  assert.match(app, /'\.skip-link, \.mobile-topbar, \.app-frame'/)
-  assert.match(app, /element\.toggleAttribute\('inert', isInert\)/)
-  assert.match(app, /nav\.scrollTop =/)
-  assert.doesNotMatch(app, /scrollIntoView/)
-
-  const renderFlow = app.slice(app.indexOf('function render()'), app.indexOf('function openDrawer()'))
-  const openFlow = app.slice(app.indexOf('function openDrawer()'), app.indexOf('function closeDrawer('))
-  const closeFlow = app.slice(app.indexOf('function closeDrawer('), app.indexOf('function closeTooltip()'))
-  assertOrdered(renderFlow, ['setDrawerBackgroundInert(false)', "document.body.classList.remove('drawer-open')", 'drawerRestoreTarget = null', "document.querySelector('#root').innerHTML"])
-  assertOrdered(openFlow, ['drawerRestoreTarget =', 'setDrawerBackgroundInert(true)', "drawer.removeAttribute('inert')", 'active.focus'])
-  assertOrdered(closeFlow, ['setDrawerBackgroundInert(false)', 'focusTarget.focus', "drawer.classList.remove('is-open')", "drawer.setAttribute('inert', '')"])
-})
-
-test('storage hints never claim success after a localStorage failure', () => {
-  assert.equal((app.match(/class="storage-hint"/g) ?? []).length, 2)
-  assert.doesNotMatch(app, /<small>lokal gespeichert<\/small>/)
-  assert.match(app, /function storageHintText\(\)[\s\S]*Speicherung nicht bestätigt[\s\S]*lokal gespeichert/)
-  assert.match(app, /querySelectorAll\('\.storage-hint'\)/)
-  assert.match(app, /hint\.textContent = storageHintText\(\)/)
-  const saveFlow = app.slice(app.indexOf('function saveProgress()'), app.indexOf('function updateProgress('))
-  assert.match(saveFlow, /catch \{[\s\S]*clearSaveAnnouncement\(\)/)
-})
-
-test('Today opens a concrete lesson and uses the local visual anchor', async () => {
-  assert.match(app, /data-lesson=/)
-  assert.match(app, /encodeURIComponent\(state\.lessonTarget\)/)
-  assert.match(app, /focusLessonTarget\(\)/)
-  assert.match(app, /window\.scrollTo\(/)
-  assert.match(app, /src="\.\/src\/assets\/makler-workflow-abstract\.png"/)
-  assert.match(app, /alt="Abstrakte Papierkomposition mit einer dunkelgrünen Prüflinie/)
-  assert.match(app, /width="1536" height="1024"/)
-  const image = await stat(new URL('../src/assets/makler-workflow-abstract.png', import.meta.url))
-  assert.ok(image.size > 0)
-})
-
-test('tooltip, save toast and back-to-top have explicit accessible contracts', () => {
-  assert.match(app, /role="tooltip"/)
-  assert.match(app, /aria-describedby="derived-tooltip"/)
-  assert.match(app, /Didaktisch aus bestätigten Lernergebnissen abgeleitet/)
-  assert.match(index, /id="save-toast"/)
-  assert.match(index, /role="status" aria-live="polite" aria-atomic="true"/)
-  assert.match(app, /window\.localStorage\.setItem[\s\S]*announceSaved\(\)/)
-  assert.match(app, /data-action="back-to-top"/)
-  assert.match(app, /prefers-reduced-motion: reduce/)
-  assert.match(app, /behavior = .* \? 'auto' : 'smooth'/)
+  assert.match(buildScript, /existingDist\.isSymbolicLink\(\)/)
+  assert.match(buildScript, /await rm\(dist, \{ recursive: true, force: true \}\)/)
+  assert.doesNotMatch(buildScript, /src\/data\/caseFile\.js/)
 })

@@ -7,9 +7,29 @@ const data = JSON.parse(await readFile(new URL('../src/data/sources.json', impor
 test('minimum official sources are registered with explicit statuses', () => {
   const byId = Object.fromEntries(data.items.map((item) => [item.id, item]))
   assert.equal(byId['wko-bpo-2024'].status, 'current')
-  assert.equal(byId['ris-vv-2026'].status, 'current')
+  assert.equal(byId['ris-bpo-2023'].status, 'current')
   assert.equal(byId['ris-apo-2004'].status, 'current')
-  assert.equal(byId['ris-vv-2010'].status, 'superseded')
+  assert.equal(byId['ris-gewo'].status, 'current')
+  assert.equal(byId['ris-standesrecht'].status, 'current')
+  assert.equal(byId['ris-tkg-2021'].status, 'current')
+})
+
+test('the statutory navigator covers all requested official RIS entries', () => {
+  const ids = new Set(data.items.map((item) => item.id))
+  for (const id of [
+    'ris-gewo',
+    'ris-maklerg',
+    'ris-versvg',
+    'ris-vag-2016',
+    'ris-standesrecht',
+    'ris-abgb',
+    'ris-ugb',
+    'ris-kschg',
+    'ris-dsg-dsgvo',
+    'ris-uwg',
+    'ris-ecg',
+    'ris-tkg-2021',
+  ]) assert.ok(ids.has(id), `missing ${id}`)
 })
 
 test('state dates and fees remain missing instead of becoming zero', () => {
@@ -24,5 +44,5 @@ test('BÖV material is not treated as an authority or copied source', () => {
   const boev = data.items.find((item) => item.id === 'boev-2025')
   assert.equal(boev.status, 'pending')
   assert.equal(boev.factStatus, 'unknown')
-  assert.match(boev.note, /kein Originaltext/)
+  assert.match(boev.note, /kein Originaltext/i)
 })

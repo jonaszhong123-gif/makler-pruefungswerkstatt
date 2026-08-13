@@ -1,4 +1,4 @@
-import { cp, mkdir, readFile, writeFile } from 'node:fs/promises'
+import { cp, lstat, mkdir, readFile, rm, writeFile } from 'node:fs/promises'
 import { isAbsolute, join, relative, resolve, sep } from 'node:path'
 import process from 'node:process'
 
@@ -12,8 +12,17 @@ if (!distFromRoot
   throw new Error('Ungültiges Build-Ziel')
 }
 
+try {
+  const existingDist = await lstat(dist)
+  if (existingDist.isSymbolicLink()) throw new Error('Build-Ziel dist darf kein symbolischer Link sein')
+} catch (error) {
+  if (error?.code !== 'ENOENT') throw error
+}
+await rm(dist, { recursive: true, force: true })
+
 await mkdir(join(dist, 'src', 'data'), { recursive: true })
 await mkdir(join(dist, 'src', 'utils'), { recursive: true })
+await mkdir(join(dist, 'src', 'views'), { recursive: true })
 await mkdir(join(dist, 'src', 'assets'), { recursive: true })
 
 const files = [
@@ -22,15 +31,19 @@ const files = [
   ['src/styles.css', 'src/styles.css'],
   ['src/assets/makler-workflow-abstract.png', 'src/assets/makler-workflow-abstract.png'],
   ['src/data/catalog.js', 'src/data/catalog.js'],
-  ['src/data/caseFile.js', 'src/data/caseFile.js'],
+  ['src/data/curriculum.js', 'src/data/curriculum.js'],
+  ['src/data/practice.js', 'src/data/practice.js'],
   ['src/data/sources.json', 'src/data/sources.json'],
   ['src/utils/progress.js', 'src/utils/progress.js'],
+  ['src/utils/router.js', 'src/utils/router.js'],
+  ['src/utils/workflow.js', 'src/utils/workflow.js'],
+  ['src/views/templates.js', 'src/views/templates.js'],
 ]
 
 for (const [from, to] of files) await cp(join(root, from), join(dist, to), { force: true })
 const manifest = {
   name: 'Makler Prüfungswerkstatt',
-  version: 'v0',
+  version: 'v1-modul-1-2',
   builtAt: new Date().toISOString(),
   files: files.map(([, to]) => to),
 }

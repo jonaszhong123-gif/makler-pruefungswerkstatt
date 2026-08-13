@@ -40,7 +40,7 @@ export function formatBindUrl(host, port) {
   return `http://${isIP(host) === 6 ? `[${host}]` : host}:${port}`
 }
 
-export function startServer({ root, port, host } = parseServeOptions()) {
+export function startServer({ root, port, host } = parseServeOptions(), write = (message) => process.stdout.write(message)) {
   const server = createServer((request, response) => {
     const pathname = decodeURIComponent(new URL(request.url ?? '/', 'http://127.0.0.1').pathname)
     const requested = pathname === '/' ? 'index.html' : pathname.replace(/^\/+/, '')
@@ -58,7 +58,9 @@ export function startServer({ root, port, host } = parseServeOptions()) {
   })
 
   server.listen(port, host, () => {
-    process.stdout.write(`Makler Prüfungswerkstatt: ${formatBindUrl(host, port)}\n`)
+    const address = server.address()
+    const boundPort = typeof address === 'object' && address ? address.port : port
+    write(`Makler Prüfungswerkstatt: ${formatBindUrl(host, boundPort)}\n`)
   })
   return server
 }

@@ -1,8 +1,9 @@
 import assert from 'node:assert/strict'
+import { once } from 'node:events'
 import { readFile } from 'node:fs/promises'
 import { resolve } from 'node:path'
 import test from 'node:test'
-import { formatBindUrl, parseServeOptions } from '../scripts/serve.mjs'
+import { formatBindUrl, parseServeOptions, startServer } from '../scripts/serve.mjs'
 
 const cwd = resolve('test-project')
 const packageJson = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8'))
@@ -31,6 +32,25 @@ test('server CLI rejects unsafe port and host values', () => {
   }
   for (const host of ['', ' 0.0.0.0', 'http://0.0.0.0', '999.1.1.1', 'bad/host']) {
     assert.throws(() => parseServeOptions(['node', 'serve.mjs', 'dist', '4174', host], cwd), /Invalid host/)
+  }
+})
+
+test('server logs the actual dynamically assigned port', async () => {
+  const writes = []
+  const server = startServer(
+    { root: cwd, port: 0, host: '127.0.0.1' },
+    (chunk) => writes.push(String(chunk)),
+  )
+  try {
+    await once(server, 'listening')
+    const address = server.address()
+    assert.equal(typeof address, 'object')
+    assert.match(writes.join(''), new RegExp(`http://127\\.0\\.0\\.1:${address.port}\\n`))
+    assert.doesNotMatch(writes.join(''), /:0\n/)
+  } finally {
+    await new Promise((resolveClose, rejectClose) => {
+      server.close((error) => error ? rejectClose(error) : resolveClose())
+    })
   }
 })
 
